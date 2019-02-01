@@ -5,7 +5,7 @@
 	<groupId>org.fornever.odata</groupId>
 	<packaging>jar</packaging>
 	<version>1.0.0</version>
-	<name>swift-core</name>
+	<name>odata-jdbc-driver</name>
 	<url>https://github.com/Soontao/jdbc-odata-driver</url>
 	<dependencies>
 		<dependency>
@@ -27,6 +27,11 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>${druid.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.mashape.unirest</groupId>
 			<artifactId>unirest-java</artifactId>
 			<version>1.4.9</version>
@@ -44,6 +49,34 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<olingo.version>2.0.10</olingo.version>
+		<druid.version>1.1.13</druid.version>
 	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<compress>true</compress>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<artifactId>odata-jdbc-driver</artifactId>
+	<scm>
+		<url>https://github.com/Soontao/jdbc-odata-driver</url>
+	</scm>
 </project>

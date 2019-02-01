@@ -26,6 +26,7 @@ public class ODataConnection implements Connection {
 	/**
 	 * odata version
 	 */
+	@SuppressWarnings("unused")
 	private ODataVersion version = ODataVersion.V2;
 
 	@Override
