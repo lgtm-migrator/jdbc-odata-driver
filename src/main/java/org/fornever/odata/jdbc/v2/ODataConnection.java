@@ -24,10 +24,21 @@ import org.fornever.odata.jdbc.types.enums.ODataVersion;
 public class ODataConnection implements Connection {
 
 	/**
+	 * OData Client
+	 */
+	private ODataClient client;
+
+	/**
 	 * odata version
 	 */
 	@SuppressWarnings("unused")
 	private ODataVersion version = ODataVersion.V2;
+	
+	
+	public ODataConnection(ODataClient client) {
+		super();
+		this.client = client;
+	}
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {

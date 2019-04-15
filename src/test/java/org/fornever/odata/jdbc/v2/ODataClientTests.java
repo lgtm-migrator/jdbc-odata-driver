@@ -31,5 +31,9 @@ public class ODataClientTests {
 		EdmEntityType entityType = entities.get(0).getEntityType();
 		assert entityType != null;
 	}
+	
+	public void testReadInstance() {
+
+	}
 
 }

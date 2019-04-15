@@ -7,10 +7,11 @@ import org.apache.olingo.odata2.api.edm.Edm;
 import org.apache.olingo.odata2.api.ep.EntityProvider;
 import org.apache.olingo.odata2.api.ep.EntityProviderException;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import com.mashape.unirest.request.GetRequest;
+import kong.unirest.GetRequest;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
+import kong.unirest.UnirestInstance;
 
 /**
  * OData V2 Client
@@ -29,9 +30,9 @@ public class ODataClient {
 	public static final String CSRF_TOKEN_HEADER = "X-CSRF-Token";
 	public static final String CSRF_TOKEN_FETCH = "Fetch";
 
-	private String serviceRoot;
+	private UnirestInstance client = Unirest.spawnInstance();
 
-	private String csrfToken = "fetch";
+	private String serviceRoot;
 
 	private String username;
 
@@ -45,12 +46,13 @@ public class ODataClient {
 		this.serviceRoot = serviceRoot;
 		this.username = username;
 		this.password = password;
-		this.retriveEdm(serviceRoot);
-	}
 
-	private GetRequest get(String uri) {
-		return Unirest.get(uri).header(CSRF_TOKEN_HEADER, csrfToken).header(AUTHORIZATION_HEADER,
-				getAuthorizationHeader());
+		this.client.config().addDefaultHeader(CSRF_TOKEN_HEADER, CSRF_TOKEN_FETCH)
+				.addDefaultHeader("Accept", APPLICATION_JSON).addDefaultHeader("Content-Type", APPLICATION_JSON)
+				.setDefaultBasicAuth(username, password);
+
+		this.retriveEdm(serviceRoot);
+
 	}
 
 	public ODataClient(String serviceRoot) throws EntityProviderException, UnirestException {
@@ -59,13 +61,9 @@ public class ODataClient {
 		this.retriveEdm(serviceRoot);
 	}
 
-	private String getAuthorizationHeader() {
-		if (this.username == null || this.username.isEmpty()) {
-			return "";
-		}
-		String temp = new StringBuilder(this.username).append(":").append(this.password).toString();
-		String result = "Basic " + new String(Base64.encodeBase64(temp.getBytes()));
-		return result;
+	public Object fetchData() {
+		return null;
+
 	}
 
 	public String getPassword() {
@@ -85,14 +83,21 @@ public class ODataClient {
 	}
 
 	private void retriveEdm(String serviceUri) throws UnirestException, EntityProviderException {
-		HttpResponse<InputStream> response = get(serviceRoot + SEPARATOR + METADATA).asBinary();
-		if (response.getHeaders().containsKey(CSRF_TOKEN_HEADER)) {
-			String csrf = response.getHeaders().getFirst(CSRF_TOKEN_HEADER);
-			if (!csrf.equals("Required") && !csrf.isEmpty()) {
-				this.csrfToken = csrf;
+		this.client.get(serviceRoot + SEPARATOR + METADATA).thenConsume(r -> {
+			// set CSRF token
+			if (r.getHeaders().containsKey(CSRF_TOKEN_HEADER)) {
+				String csrf = r.getHeaders().getFirst(CSRF_TOKEN_HEADER);
+				if (!csrf.equals("Required") && !csrf.isEmpty()) {
+					this.client.config().setDefaultHeader(CSRF_TOKEN_HEADER, csrf);
+				}
 			}
-		}
-		this.serviceEdm = EntityProvider.readMetadata(response.getRawBody(), true);
+			try {
+				this.serviceEdm = EntityProvider.readMetadata(r.getContent(), true);
+			} catch (EntityProviderException e) {
+				e.printStackTrace();
+			}
+		});
+
 	}
 
 	public void setPassword(String password) {

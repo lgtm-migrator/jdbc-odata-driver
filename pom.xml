@@ -32,9 +32,9 @@
 			<version>${druid.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mashape.unirest</groupId>
+			<groupId>com.konghq</groupId>
 			<artifactId>unirest-java</artifactId>
-			<version>1.4.9</version>
+			<version>2.2.00</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
