@@ -1,8 +1,6 @@
 package org.fornever.odata.jdbc.v2;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverPropertyInfo;

@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 
-public class ODataDriverTest {
+public class ODataDriverTests {
 
 	private String connectionURL = "jdbc:odata://user:pass@services.odata.org:443/V2/Northwind/Northwind.svc?useHttp=false";
 

@@ -37,7 +37,7 @@ public class ODataConnection implements Connection {
 	
 	public ODataConnection(ODataClient client) {
 		super();
-		this.client = client;
+		this.setClient(client);
 	}
 
 	@Override
@@ -366,6 +366,14 @@ public class ODataConnection implements Connection {
 	public int getNetworkTimeout() throws SQLException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public ODataClient getClient() {
+		return client;
+	}
+
+	public void setClient(ODataClient client) {
+		this.client = client;
 	}
 
 }

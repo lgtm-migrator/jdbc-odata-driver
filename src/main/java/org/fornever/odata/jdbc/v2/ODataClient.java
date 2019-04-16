@@ -1,14 +1,12 @@
 package org.fornever.odata.jdbc.v2;
 
-import java.io.InputStream;
-
-import org.apache.commons.codec.binary.Base64;
 import org.apache.olingo.odata2.api.edm.Edm;
 import org.apache.olingo.odata2.api.ep.EntityProvider;
 import org.apache.olingo.odata2.api.ep.EntityProviderException;
+import org.fornever.odata.jdbc.types.ODataV2Param;
 
-import kong.unirest.GetRequest;
-import kong.unirest.HttpResponse;
+import kong.unirest.Client;
+import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import kong.unirest.UnirestInstance;
@@ -56,13 +54,19 @@ public class ODataClient {
 	}
 
 	public ODataClient(String serviceRoot) throws EntityProviderException, UnirestException {
-		super();
-		this.serviceRoot = serviceRoot;
-		this.retriveEdm(serviceRoot);
+		this(serviceRoot, "", "");
 	}
 
-	public Object fetchData() {
-		return null;
+	/**
+	 * fetch data by parameter
+	 * 
+	 * @param collectionName of entity
+	 * @param param          of query
+	 * @return
+	 */
+	public JsonNode fetchData(String collectionName, ODataV2Param param) {
+		return this.client.get(String.format("%s%s%s", this.serviceRoot, SEPARATOR, collectionName))
+				.queryString(param.toMap()).asJson().getBody();
 
 	}
 
@@ -83,20 +87,21 @@ public class ODataClient {
 	}
 
 	private void retriveEdm(String serviceUri) throws UnirestException, EntityProviderException {
-		this.client.get(serviceRoot + SEPARATOR + METADATA).thenConsume(r -> {
-			// set CSRF token
-			if (r.getHeaders().containsKey(CSRF_TOKEN_HEADER)) {
-				String csrf = r.getHeaders().getFirst(CSRF_TOKEN_HEADER);
-				if (!csrf.equals("Required") && !csrf.isEmpty()) {
-					this.client.config().setDefaultHeader(CSRF_TOKEN_HEADER, csrf);
-				}
-			}
-			try {
-				this.serviceEdm = EntityProvider.readMetadata(r.getContent(), true);
-			} catch (EntityProviderException e) {
-				e.printStackTrace();
-			}
-		});
+		Unirest.get(serviceRoot + SEPARATOR + METADATA).header(CSRF_TOKEN_HEADER, CSRF_TOKEN_FETCH)
+				.basicAuth(this.username, this.password).thenConsume(r -> {
+					// set CSRF token
+					if (r.getHeaders().containsKey(CSRF_TOKEN_HEADER)) {
+						String csrf = r.getHeaders().getFirst(CSRF_TOKEN_HEADER);
+						if (!csrf.equals("Required") && !csrf.isEmpty()) {
+							this.client.config().setDefaultHeader(CSRF_TOKEN_HEADER, csrf);
+						}
+					}
+					try {
+						this.serviceEdm = EntityProvider.readMetadata(r.getContent(), true);
+					} catch (EntityProviderException e) {
+						e.printStackTrace();
+					}
+				});
 
 	}
 
